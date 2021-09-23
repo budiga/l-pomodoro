@@ -11,8 +11,8 @@ let progressBar = new ProgressBar.Circle(timerContainer, {
     trailWidth: 3,
     svgStyle: null
 })
-let workTime = 1 * 60 // 工作25分钟
-let restTime = 0.2 * 60 // 休息5分钟
+let workTime = 5 // 工作25分钟
+let restTime = 3 // 休息5分钟
 let state = {}
 
 function render () {
@@ -21,6 +21,7 @@ function render () {
     let ss = s % 60
     let mm = ((s - ss)/ 60).toFixed()
     progressBar.set(1- s/maxTime)
+    // progressBar.set(0.5)
     progressBar.setText(`${mm.toString().padStart(2, '0')}:${ss.toString().padStart(2, '0')}`)
     if(type === 0) {
           switchButton.innerText = '开始工作'
@@ -59,10 +60,10 @@ const workTimer = new Timer({
                 notification({
                   title: '恭喜你完成任务',
                   body: '是否开始休息？',
-                  actionText: '休息五分钟',
                   closeButtonText: '继续工作',
+                  actionText: '开始休息',
+                  onclose: startWork,
                   onaction: startRest,
-                  onclose: startWork
                 })
             } else { // windows直接alert
                 alert('工作结束')
@@ -71,25 +72,28 @@ const workTimer = new Timer({
             setState({type: 0, remainTime: 0})
             if(process.platform === 'darwin') {
                 notification({
-                    body: '开始新的工作吧!',
                     title: '休息结束',
+                    body: '开始新的工作吧!',
                     closeButtonText: '继续休息',
                     actionText: '开始工作',
+                    onclose: startRest,
                     onaction: startWork,
-                    onclose: startRest
                 })
             } else {
-                alert('工作结束')
+                alert('休息结束')
             }
         }
     }
 });
 
+let closeManual = false
 switchButton.onclick = function() {
     if (this.innerText === '开始工作') {
         startWork()
+        closeManual = ipcRenderer.sendSync('closeNotiSync')
     } else if(this.innerText === '开始休息'){
         startRest()
+        closeManual = ipcRenderer.sendSync('closeNotiSync')
     } else {
         workTimer.stop()
     }
@@ -102,6 +106,10 @@ async function notification({title, body, actionText, closeButtonText, onclose, 
         actions: [{text: actionText, type: 'button'}],
         closeButtonText
     })
+    if (closeManual) {
+        closeManual = false
+        return
+    }
     res.event === 'close' ? onclose() : onaction()
 }
 

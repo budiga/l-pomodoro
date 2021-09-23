@@ -23,9 +23,10 @@ function createMainWindow() {
 }
 
 function handleIPC() {
+  let notification;
   ipcMain.handle('notification', async (e, {body, title, actions, closeButtonText}) => {
     let res = await new Promise((resolve, reject) => {
-      let notification = new Notification({
+      notification = new Notification({
         title,
         body,
         actions,
@@ -40,6 +41,16 @@ function handleIPC() {
       })
     })
     return res
+  })
+
+  ipcMain.on('closeNotiSync', (event) => {
+    if (notification) {
+      notification.close(true)
+      notification = null
+      event.returnValue = true
+    } else {
+      event.returnValue = false
+    }
   })
 }
 
