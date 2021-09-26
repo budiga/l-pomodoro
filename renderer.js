@@ -21,7 +21,6 @@ function render () {
     let ss = s % 60
     let mm = ((s - ss)/ 60).toFixed()
     progressBar.set(1- s/maxTime)
-    // progressBar.set(0.5)
     progressBar.setText(`${mm.toString().padStart(2, '0')}:${ss.toString().padStart(2, '0')}`)
     if(type === 0) {
           switchButton.innerText = '开始工作'
@@ -79,7 +78,7 @@ const workTimer = new Timer({
                     onclose: startRest,
                     onaction: startWork,
                 })
-            } else {
+            } else { // windows直接alert
                 alert('休息结束')
             }
         }
