@@ -81,3 +81,5 @@ app.whenReady().then(() => {
   handleIPC()
   createMainWindow()
 })
+
+console.log('---test git fetch---')
